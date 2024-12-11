@@ -3,7 +3,7 @@
 ## Getting Started
 
 1. Fork the Project:
-   ![There is a button on the top right of you codesandbox environment after signing in](image.png)
+   ![There is a button on the top right of you codesandbox environment after signing in](public/image.png)
 2. Start Coding
 
 This repository demonstrates a backend architecture that handles asynchronous tasks, workflows, and job execution using TypeScript, Express.js, and TypeORM. The project showcases how to:

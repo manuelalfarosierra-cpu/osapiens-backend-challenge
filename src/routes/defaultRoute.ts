@@ -4,6 +4,8 @@ import path from "path";
 import { marked } from "marked";
 
 const router = express.Router();
+const staticPath = path.join(__dirname, "../../public");
+router.use("/public", express.static(staticPath));
 
 router.get("/", (req, res) => {
   const readmePath = path.join(__dirname, "../..", "README.md");
