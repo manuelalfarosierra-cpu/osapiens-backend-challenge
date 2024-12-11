@@ -1,5 +1,11 @@
 # Backend Coding Challenge
 
+## Getting Started
+
+1. Fork the Project:
+   ![There is a button on the top right of you codesandbox environment after signing in](image.png)
+2. Start Coding
+
 This repository demonstrates a backend architecture that handles asynchronous tasks, workflows, and job execution using TypeScript, Express.js, and TypeORM. The project showcases how to:
 
 - Define and manage entities such as `Task` and `Workflow`.
