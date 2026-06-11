@@ -6,7 +6,7 @@ import { PolygonAreaJob } from "./PolygonAreaJob";
 const jobMap: Record<string, () => Job> = {
   analysis: () => new DataAnalysisJob(),
   notification: () => new EmailNotificationJob(),
-  polygonArea: () => new PolygonAreaJob(),
+  polygonarea: () => new PolygonAreaJob(),
 };
 
 export function getJobForTaskType(taskType: string): Job {
