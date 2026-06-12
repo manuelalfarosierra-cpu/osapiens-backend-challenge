@@ -34,13 +34,6 @@ export class Task {
   @ManyToOne(() => Workflow, (workflow) => workflow.tasks)
   workflow!: Workflow;
 
-  @Column({
-    type: "boolean",
-    default: false,
-  })
-  requiresContext!: boolean;
-
   @Column({ type: "text", nullable: true })
   dependsOn?: string | null;
 }
-

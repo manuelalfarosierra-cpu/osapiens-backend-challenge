@@ -1,11 +1,13 @@
-import { Repository } from "typeorm";
+import { TaskStatus } from "../workers/taskRunner";
 
-import { Task } from "../models/Task";
-import { Result } from "../models/Result";
-import { Workflow } from "../models/Workflow";
+export interface JobDependencyOutput {
+  stepId: string;
+  taskId: string;
+  taskType: string;
+  status: TaskStatus;
+  output: unknown;
+}
 
 export interface JobContext {
-  taskRepository: Repository<Task>;
-  resultRepository: Repository<Result>;
-  workflowRepository: Repository<Workflow>;
+  dependencies: JobDependencyOutput[];
 }

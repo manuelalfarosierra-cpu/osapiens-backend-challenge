@@ -12,4 +12,6 @@ steps:
   - stepId: "report"
     taskType: "reportGeneration"
     stepNumber: 3
-    requiresContext: true
+    dependsOn:
+      - polygon-area
+      - analysis
