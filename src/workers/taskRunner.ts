@@ -67,32 +67,8 @@ export class TaskRunner {
       await this.taskRepository.save(task);
 
       throw error;
-    }
-
-    const currentWorkflow = await this.workflowRepository.findOne({
-      where: { workflowId: task.workflow.workflowId },
-      relations: ["tasks"],
-    });
-
-    if (currentWorkflow) {
-      const allFinished = currentWorkflow.tasks.every(
-        (t) =>
-          t.status === TaskStatus.Completed || t.status === TaskStatus.Failed,
-      );
-
-      const anyFailed = currentWorkflow.tasks.some(
-        (t) => t.status === TaskStatus.Failed,
-      );
-
-      if (!allFinished) {
-        currentWorkflow.status = WorkflowStatus.InProgress;
-      } else if (anyFailed) {
-        currentWorkflow.status = WorkflowStatus.Failed;
-      } else {
-        currentWorkflow.status = WorkflowStatus.Completed;
-      }
-
-      await this.workflowRepository.save(currentWorkflow);
+    } finally {
+      this.updateWorkflowStatusAndResult(task);
     }
   }
 
@@ -152,5 +128,77 @@ export class TaskRunner {
     return {
       dependencies: dependencyOutputs,
     };
+  }
+
+  private async updateWorkflowStatusAndResult(task: Task): Promise<void> {
+    const currentWorkflow = await this.workflowRepository.findOne({
+      where: { workflowId: task.workflow.workflowId },
+      relations: ["tasks"],
+    });
+
+    if (!currentWorkflow) {
+      return;
+    }
+
+    const allFinished = currentWorkflow.tasks.every(
+      (t) =>
+        t.status === TaskStatus.Completed || t.status === TaskStatus.Failed,
+    );
+
+    const anyFailed = currentWorkflow.tasks.some(
+      (t) => t.status === TaskStatus.Failed,
+    );
+
+    if (!allFinished) {
+      currentWorkflow.status = WorkflowStatus.InProgress;
+    } else {
+      currentWorkflow.status = anyFailed
+        ? WorkflowStatus.Failed
+        : WorkflowStatus.Completed;
+
+      currentWorkflow.finalResult =
+        await this.buildWorkflowFinalResult(currentWorkflow);
+    }
+
+    await this.workflowRepository.save(currentWorkflow);
+  }
+
+  private async buildWorkflowFinalResult(workflow: Workflow): Promise<string> {
+    const tasks = await Promise.all(
+      workflow.tasks
+        .sort((a, b) => a.stepNumber - b.stepNumber)
+        .map(async (task) => {
+          const result = task.resultId
+            ? await this.resultRepository.findOne({
+                where: { resultId: task.resultId },
+              })
+            : null;
+
+          let output = null;
+
+          if (result?.data) {
+            try {
+              output = JSON.parse(result.data);
+            } catch {
+              output = result.data;
+            }
+          }
+
+          return {
+            stepId: task.stepId,
+            taskId: task.taskId,
+            taskType: task.taskType,
+            status: task.status,
+            output,
+          };
+        }),
+    );
+
+    return JSON.stringify({
+      workflowId: workflow.workflowId,
+      workflowName: workflow.workflowName,
+      status: workflow.status,
+      tasks,
+    });
   }
 }
