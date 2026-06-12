@@ -1,0 +1,15 @@
+name: "report_workflow"
+steps:
+  - stepId: "polygon-area"
+    taskType: "polygonArea"
+    stepNumber: 1
+
+  - stepId: "analysis"
+    taskType: "analysis"
+    stepNumber: 2
+
+
+  - stepId: "report"
+    taskType: "reportGeneration"
+    stepNumber: 3
+    requiresContext: true

@@ -1,7 +1,9 @@
 name: "example_workflow"
 steps:
-  - taskType: "polygonarea"
+  - stepId: "polygonArea"
+    taskType: "polygonArea"
     stepNumber: 1
-  - taskType: "notification"
+  - stepId: "notification"
+    taskType: "notification"
     stepNumber: 2
 
