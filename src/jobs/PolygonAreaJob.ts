@@ -3,11 +3,10 @@ import { Feature, Polygon, MultiPolygon } from "geojson";
 
 import { Job } from "./Job";
 import { Task } from "../models/Task";
+import { JobContext } from "./JobContext";
 
 export class PolygonAreaJob implements Job {
-  async run(task: Task): Promise<any> {
-    console.log(`Running polygon area calculation for task ${task.taskId}...`);
-
+  async run(task: Task, _context?: JobContext): Promise<any> {
     if (!task.geoJson) {
       throw new Error("Missing geoJson in task");
     }
@@ -15,7 +14,9 @@ export class PolygonAreaJob implements Job {
     let inputGeometry: Feature<Polygon | MultiPolygon>;
 
     try {
-      inputGeometry = JSON.parse(task.geoJson) as Feature<Polygon | MultiPolygon>;
+      inputGeometry = JSON.parse(task.geoJson) as Feature<
+        Polygon | MultiPolygon
+      >;
     } catch {
       throw new Error("Invalid GeoJSON: unable to parse JSON");
     }
