@@ -118,6 +118,7 @@ src
    -H "Content-Type: application/json" \
    -d '{
     "clientId": "client123",
+    "workflow": "example_workflow",
     "geoJson": {
         "type": "Polygon",
         "coordinates": [
