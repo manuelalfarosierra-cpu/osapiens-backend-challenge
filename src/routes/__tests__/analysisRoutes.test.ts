@@ -57,6 +57,7 @@ const buildRouter = () =>
 
 describe("/analysis", () => {
   beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
     workflowExists.mockReset();
     workflowFactory.createWorkflowFromYAML.mockReset();
   });
