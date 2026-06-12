@@ -18,8 +18,7 @@ interface WorkflowStep {
   stepId?: string;
   taskType: string;
   stepNumber: number;
-  requiresContext?: boolean;
-  dependsOn?: string;
+  dependsOn?: string[];
 }
 
 interface WorkflowDefinition {
@@ -65,7 +64,6 @@ export class WorkflowFactory {
       task.taskType = step.taskType;
       task.stepNumber = step.stepNumber;
       task.workflow = savedWorkflow;
-      task.requiresContext = step.requiresContext ?? false;
       task.dependsOn = step.dependsOn ? JSON.stringify(step.dependsOn) : null;
       return task;
     });
@@ -80,40 +78,75 @@ export class WorkflowFactory {
     const stepNumbers = new Set<number>();
 
     for (const step of steps) {
+      // StepId required
       if (!step.stepId) {
         throw new BadRequestError("Each workflow step must define an id");
       }
 
+      // StepId no duplicated
       if (stepIds.has(step.stepId)) {
         throw new BadRequestError(`Duplicated workflow step id: ${step.id}`);
       }
 
-      stepIds.add(step.stepId);
-
+      // StepNumber requited
       if (step.stepNumber === undefined || step.stepNumber === null) {
         throw new BadRequestError(
           `Step ${step.stepId} must define a stepNumber`,
         );
       }
 
+      // StepNumber no duplicated
       if (stepNumbers.has(step.stepNumber)) {
         throw new BadRequestError(
           `Duplicated workflow stepNumber: ${step.stepNumber}`,
         );
       }
 
-      stepNumbers.add(step.stepNumber);
-
+      // TaskType required
       if (!step.taskType) {
         throw new BadRequestError(`Step ${step.stepId} must define a taskType`);
       }
 
+      // TaskType exist
       if (!hasJobForTaskType(step.taskType)) {
         throw new BadRequestError(
           `Unknown taskType '${step.taskType}' in step '${step.stepId}'`,
         );
       }
+
+      // Validate dependsOn is an Array
+      if (step.dependsOn) {
+        if (!Array.isArray(step.dependsOn)) {
+          throw new BadRequestError(
+            `Step ${step.stepId} dependsOn must be an array`,
+          );
+        }
+      }
+
+      // Validate dependsOn duplicated
+      if (step.dependsOn) {
+        const uniqueDependencies = new Set(step.dependsOn);
+
+        if (uniqueDependencies.size !== step.dependsOn.length) {
+          throw new BadRequestError(
+            `Step ${step.stepId} has duplicated dependencies`,
+          );
+        }
+      }
+
+      // Validate dependsOn jobs exists
+      if (step.dependsOn) {
+        for (const dependencyStepId of step.dependsOn) {
+          if (!stepIds.has(dependencyStepId)) {
+            throw new BadRequestError(
+              `Step ${step.stepId} depends on '${dependencyStepId}', but it was not defined in a previous step`,
+            );
+          }
+        }
+      }
+
+      stepNumbers.add(step.stepNumber);
+      stepIds.add(step.stepId);
     }
   }
 }
-

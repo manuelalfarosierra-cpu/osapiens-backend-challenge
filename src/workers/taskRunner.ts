@@ -35,13 +35,7 @@ export class TaskRunner {
       console.log(
         `[STARTING JOB] ${task.stepId} ${task.stepNumber} ${task.workflow?.workflowName}`,
       );
-      const context = task.requiresContext
-        ? {
-            taskRepository: this.taskRepository,
-            resultRepository: this.resultRepository,
-            workflowRepository: this.workflowRepository,
-          }
-        : undefined;
+      const context = await this.buildJobContext(task);
       const taskResult = await job.run(task, context);
       console.log(
         `[JOB FINISHED OK] ${task.stepId} ${task.stepNumber} ${task.workflow?.workflowName}`,
@@ -100,5 +94,63 @@ export class TaskRunner {
 
       await this.workflowRepository.save(currentWorkflow);
     }
+  }
+
+  private async buildJobContext(task: Task): Promise<JobContext> {
+    const dependencies = task.dependsOn ? JSON.parse(task.dependsOn) : [];
+
+    const dependencyOutputs = await Promise.all(
+      dependencies.map(async (dependencyStepId: string) => {
+        const dependencyTask = await this.taskRepository.findOne({
+          where: {
+            workflow: {
+              workflowId: task.workflow.workflowId,
+            },
+            stepId: dependencyStepId,
+          },
+        });
+
+        if (!dependencyTask) {
+          throw new Error(`Dependency ${dependencyStepId} not found`);
+        }
+
+        if (
+          dependencyTask.status !== TaskStatus.Completed &&
+          dependencyTask.status !== TaskStatus.Failed
+        ) {
+          throw new Error(`Dependency ${dependencyStepId} is not completed`);
+        }
+
+        const result = dependencyTask.resultId
+          ? await this.resultRepository.findOne({
+              where: {
+                resultId: dependencyTask.resultId,
+              },
+            })
+          : null;
+
+        let output = null;
+
+        if (result?.data) {
+          try {
+            output = JSON.parse(result.data);
+          } catch {
+            output = result.data;
+          }
+        }
+
+        return {
+          stepId: dependencyTask.stepId,
+          taskId: dependencyTask.taskId,
+          taskType: dependencyTask.taskType,
+          status: dependencyTask.status,
+          output,
+        };
+      }),
+    );
+
+    return {
+      dependencies: dependencyOutputs,
+    };
   }
 }
