@@ -2,8 +2,9 @@ import { AppDataSource } from "../data-source";
 import { Task } from "../models/Task";
 import { Workflow } from "../models/Workflow";
 import { Result } from "../models/Result";
-import { TaskRunner, TaskStatus } from "./taskRunner";
-import { WorkflowStatus } from "../workflows/WorkflowFactory";
+import { TaskRunner } from "./taskRunner";
+import { TaskStatus } from "./TaskStatus";
+import { WorkflowStatus } from "../workflows/WorkflowStatus";
 
 export async function taskWorker() {
   const workflowRepository = AppDataSource.getRepository(Workflow);

@@ -13,7 +13,8 @@ import * as JobFactory from "../../jobs/JobFactory";
 import { Result } from "../../models/Result";
 import { Task } from "../../models/Task";
 import { Workflow } from "../../models/Workflow";
-import { TaskRunner, TaskStatus } from "../taskRunner";
+import { TaskRunner } from "../taskRunner";
+import { TaskStatus } from "../TaskStatus";
 
 describe("TaskRunner", () => {
   const workflowRepository = {

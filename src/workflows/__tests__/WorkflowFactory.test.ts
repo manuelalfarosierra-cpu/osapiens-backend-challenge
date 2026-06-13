@@ -5,11 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Task } from "../../models/Task";
 import { Workflow } from "../../models/Workflow";
-import { TaskStatus } from "../../workers/taskRunner";
-import {
-  WorkflowFactory,
-  WorkflowStatus,
-} from "../WorkflowFactory";
+import { TaskStatus } from "../../workers/TaskStatus";
+import { WorkflowFactory } from "../WorkflowFactory";
+import { WorkflowStatus } from "../WorkflowStatus";
 
 describe("WorkflowFactory", () => {
   let tempDirectory: string | null = null;

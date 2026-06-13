@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Workflow } from "./Workflow";
-import { TaskStatus } from "../workers/taskRunner";
+import { TaskStatus } from "../workers/TaskStatus";
 
 @Entity({ name: "tasks" })
 export class Task {
@@ -13,7 +13,7 @@ export class Task {
   @Column("text")
   geoJson!: string;
 
-  @Column()
+  @Column({ type: "text" })
   status!: TaskStatus;
 
   @Column({ nullable: true, type: "text" })

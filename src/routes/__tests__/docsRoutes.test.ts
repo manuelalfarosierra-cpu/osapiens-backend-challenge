@@ -59,6 +59,11 @@ describe("docsRoutes", () => {
             operationId: "createAnalysisWorkflow",
           },
         },
+        "/workflow/{id}/status": {
+          get: {
+            operationId: "getWorkflowStatus",
+          },
+        },
       },
     });
   });
@@ -69,6 +74,7 @@ describe("docsRoutes", () => {
     expect(response.contentType).toBe("application/yaml");
     expect(response.body).toContain("openapi: 3.1.0");
     expect(response.body).toContain("/analysis:");
+    expect(response.body).toContain("/workflow/{id}/status:");
   });
 
   it("renders the Redoc reference page", async () => {
