@@ -1,4 +1,5 @@
 # Backend Coding Challenge
+[![Test Status](https://github.com/manuelalfarosierra-cpu/osapiens-backend-challenge/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/manuelalfarosierra-cpu/osapiens-backend-challenge/actions/workflows/test.yml)
 ## By Manuel Samuel Alfaro Sierra
 
 This repository contains the backend implementation for the osapiens coding challenge, including workflow execution, asynchronous task processing, and OpenAPI documentation.
