@@ -9,7 +9,7 @@ const {
   createWorkflowTestDataSource,
 } = await import("../../../test-utils/buildWorkflowTestApp");
 
-describe("GET /workflow/:id/status integration", () => {
+describe("workflow routes integration", () => {
   let dataSource: Awaited<ReturnType<typeof createWorkflowTestDataSource>>;
   let workflowRepository: Repository<InstanceType<typeof Workflow>>;
   let taskRepository: Repository<InstanceType<typeof Task>>;
@@ -124,6 +124,55 @@ describe("GET /workflow/:id/status integration", () => {
   it("returns 404 when the workflow does not exist", async () => {
     const response = await invokeGet(
       "/workflow/00000000-0000-0000-0000-000000000000/status",
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      message: "Workflow 00000000-0000-0000-0000-000000000000 not found",
+    });
+  });
+
+  it("returns the final workflow results from the real database", async () => {
+    const workflow = await workflowRepository.save({
+      workflowName: "example_workflow",
+      clientId: "client-123",
+      status: "completed",
+      finalResult: '{"summary":"done"}',
+    });
+
+    const response = await invokeGet(
+      `/workflow/${workflow.workflowId}/results`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      workflowId: workflow.workflowId,
+      status: "completed",
+      finalResult: '{"summary":"done"}',
+    });
+  });
+
+  it("returns 400 when requesting results for an incomplete workflow", async () => {
+    const workflow = await workflowRepository.save({
+      workflowName: "example_workflow",
+      clientId: "client-123",
+      status: "in_progress",
+      finalResult: null,
+    });
+
+    const response = await invokeGet(
+      `/workflow/${workflow.workflowId}/results`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      message: `Workflow ${workflow.workflowId} is not completed yet`,
+    });
+  });
+
+  it("returns 404 when requesting results for a missing workflow", async () => {
+    const response = await invokeGet(
+      "/workflow/00000000-0000-0000-0000-000000000000/results",
     );
 
     expect(response.status).toBe(404);

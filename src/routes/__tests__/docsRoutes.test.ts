@@ -64,6 +64,11 @@ describe("docsRoutes", () => {
             operationId: "getWorkflowStatus",
           },
         },
+        "/workflow/{id}/results": {
+          get: {
+            operationId: "getWorkflowResults",
+          },
+        },
       },
     });
   });
@@ -75,6 +80,7 @@ describe("docsRoutes", () => {
     expect(response.body).toContain("openapi: 3.1.0");
     expect(response.body).toContain("/analysis:");
     expect(response.body).toContain("/workflow/{id}/status:");
+    expect(response.body).toContain("/workflow/{id}/results:");
   });
 
   it("renders the Redoc reference page", async () => {

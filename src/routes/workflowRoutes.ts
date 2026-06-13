@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 
 import { AppDataSource } from "../data-source";
 import { Workflow } from "../models/Workflow";
@@ -6,8 +6,26 @@ import { WorkflowService } from "../services/workflowService";
 import { AppError } from "../shared/errors/AppError";
 
 interface WorkflowRouteDependencies {
-  workflowService: Pick<WorkflowService, "getWorkflowStatus">;
+  workflowService: Pick<
+    WorkflowService,
+    "getWorkflowStatus" | "getWorkflowResults"
+  >;
 }
+
+const handleRouteError = (error: unknown, res: Response): void => {
+  if (error instanceof AppError) {
+    res.status(error.statusCode).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  console.error(error);
+
+  res.status(500).json({
+    message: "Internal server error",
+  });
+};
 
 export const buildWorkflowRouter = ({
   workflowService,
@@ -20,18 +38,17 @@ export const buildWorkflowRouter = ({
 
       res.status(200).json(status);
     } catch (error) {
-      if (error instanceof AppError) {
-        res.status(error.statusCode).json({
-          message: error.message,
-        });
-        return;
-      }
+      handleRouteError(error, res);
+    }
+  });
 
-      console.error("Error getting workflow status:", error);
+  router.get("/:id/results", async (req, res): Promise<void> => {
+    try {
+      const results = await workflowService.getWorkflowResults(req.params.id);
 
-      res.status(500).json({
-        message: "Internal server error",
-      });
+      res.status(200).json(results);
+    } catch (error) {
+      handleRouteError(error, res);
     }
   });
 

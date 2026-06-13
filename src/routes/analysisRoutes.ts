@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { WorkflowFactory } from "../workflows/WorkflowFactory"; // Create a folder for factories if you prefer
 import path from "path";
@@ -9,6 +9,21 @@ interface AnalysisRouteDependencies {
   workflowFactory: Pick<WorkflowFactory, "createWorkflowFromYAML">;
   workflowExists: (workflowFile: string) => boolean;
 }
+
+const handleRouteError = (error: unknown, res: Response): void => {
+  if (error instanceof AppError) {
+    res.status(error.statusCode).json({
+      message: error.message,
+    });
+    return;
+  }
+
+  console.error(error);
+
+  res.status(500).json({
+    message: "Failed to create workflow",
+  });
+};
 
 export const buildAnalysisRouter = ({
   workflowFactory,
@@ -46,22 +61,7 @@ export const buildAnalysisRouter = ({
         message: "Workflow created and tasks queued from YAML definition.",
       });
     } catch (error) {
-      if (error instanceof AppError) {
-        console.error(
-          `[ERROR] Creating workflow. HTTP STATUS: ${error.statusCode} Message: ${error.message}`,
-        );
-        res.status(error.statusCode).json({
-          message: error.message,
-        });
-
-        return;
-      }
-
-      console.error("Error creating workflow:", error);
-
-      res.status(500).json({
-        message: "Failed to create workflow",
-      });
+      handleRouteError(error, res);
     }
   });
 

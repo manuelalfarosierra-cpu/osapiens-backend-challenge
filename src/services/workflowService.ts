@@ -4,6 +4,8 @@ import { Workflow } from "../models/Workflow";
 import { Task } from "../models/Task";
 import { TaskStatus } from "../workers/TaskStatus";
 import { NotFoundError } from "../shared/errors/NotFoundError";
+import { BadRequestError } from "../shared/errors/BadRequestError";
+import { WorkflowStatus } from "../workflows/WorkflowStatus";
 
 export class WorkflowService {
   constructor(private workflowRepository: Repository<Workflow>) {}
@@ -27,6 +29,26 @@ export class WorkflowService {
       status: workflow.status,
       completedTasks,
       totalTasks: workflow.tasks.length,
+    };
+  }
+
+  async getWorkflowResults(workflowId: string) {
+    const workflow = await this.workflowRepository.findOne({
+      where: { workflowId },
+    });
+
+    if (!workflow) {
+      throw new NotFoundError(`Workflow ${workflowId} not found`);
+    }
+
+    if (workflow.status !== WorkflowStatus.Completed) {
+      throw new BadRequestError(`Workflow ${workflowId} is not completed yet`);
+    }
+
+    return {
+      workflowId: workflow.workflowId,
+      status: workflow.status,
+      finalResult: workflow.finalResult,
     };
   }
 }
