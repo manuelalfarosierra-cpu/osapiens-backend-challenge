@@ -3,16 +3,10 @@ import * as yaml from "js-yaml";
 import { DataSource } from "typeorm";
 import { Workflow } from "../models/Workflow";
 import { Task } from "../models/Task";
-import { TaskStatus } from "../workers/taskRunner";
+import { TaskStatus } from "../workers/TaskStatus";
 import { BadRequestError } from "../shared/errors/BadRequestError";
 import { hasJobForTaskType } from "../jobs/JobFactory";
-
-export enum WorkflowStatus {
-  Initial = "initial",
-  InProgress = "in_progress",
-  Completed = "completed",
-  Failed = "failed",
-}
+import { WorkflowStatus } from "./WorkflowStatus";
 
 interface WorkflowStep {
   stepId?: string;

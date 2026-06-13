@@ -19,6 +19,10 @@ export const openApiSpec = {
       name: "Analysis",
       description: "Create analysis workflows from predefined YAML files.",
     },
+    {
+      name: "Workflow",
+      description: "Inspect workflow execution state and task progress.",
+    },
   ],
   paths: {
     "/analysis": {
@@ -109,6 +113,67 @@ export const openApiSpec = {
         },
       },
     },
+    "/workflow/{id}/status": {
+      get: {
+        tags: ["Workflow"],
+        summary: "Get workflow execution status",
+        description:
+          "Returns the current workflow status together with the number of completed tasks.",
+        operationId: "getWorkflowStatus",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "Workflow identifier.",
+            schema: {
+              type: "string",
+              format: "uuid",
+            },
+            example: "0ab26b35-682c-42ce-a842-d62cea585885",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Workflow status returned",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/WorkflowStatusResponse",
+                },
+              },
+            },
+          },
+          "404": {
+            description: "Workflow not found",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+                example: {
+                  message:
+                    "Workflow 0ab26b35-682c-42ce-a842-d62cea585885 not found",
+                },
+              },
+            },
+          },
+          "500": {
+            description: "Unexpected workflow status error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+                example: {
+                  message: "Internal server error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -148,6 +213,32 @@ export const openApiSpec = {
           message: {
             type: "string",
             example: "Workflow created and tasks queued from YAML definition.",
+          },
+        },
+      },
+      WorkflowStatusResponse: {
+        type: "object",
+        required: ["workflowId", "status", "completedTasks", "totalTasks"],
+        properties: {
+          workflowId: {
+            type: "string",
+            format: "uuid",
+            example: "0ab26b35-682c-42ce-a842-d62cea585885",
+          },
+          status: {
+            type: "string",
+            enum: ["initial", "in_progress", "completed", "failed"],
+            example: "in_progress",
+          },
+          completedTasks: {
+            type: "integer",
+            minimum: 0,
+            example: 1,
+          },
+          totalTasks: {
+            type: "integer",
+            minimum: 0,
+            example: 3,
           },
         },
       },

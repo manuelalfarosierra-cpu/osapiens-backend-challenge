@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Task } from "./Task";
-import { WorkflowStatus } from "../workflows/WorkflowFactory";
+import { WorkflowStatus } from "../workflows/WorkflowStatus";
 
 @Entity({ name: "workflows" })
 export class Workflow {
@@ -13,7 +13,7 @@ export class Workflow {
   @Column()
   clientId!: string;
 
-  @Column({ default: WorkflowStatus.Initial })
+  @Column({ type: "text", default: WorkflowStatus.Initial })
   status!: WorkflowStatus;
 
   @OneToMany(() => Task, (task) => task.workflow)

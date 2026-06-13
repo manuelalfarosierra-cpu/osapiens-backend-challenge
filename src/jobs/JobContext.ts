@@ -1,4 +1,4 @@
-import { TaskStatus } from "../workers/taskRunner";
+import { TaskStatus } from "../workers/TaskStatus";
 
 export interface JobDependencyOutput {
   stepId: string;
