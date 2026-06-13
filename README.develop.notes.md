@@ -66,19 +66,41 @@ This document provides a detailed summary of the implementation work completed f
 - Added tests to validate correct generation and persistence of `finalResult`.
 - Added or updated OpenAPI documentation so the endpoints reflect the new fields and behavior introduced in this exercise.
 
-## 5. Create an Endpoint for Retrieving Workflow Results
+## 5. Create an Endpoint for Getting Workflow Status
 
-- Added the `GET /workflow/:id/results` endpoint to retrieve the final output of a workflow.
-- Created `getWorkflowResults()` in `WorkflowService` to centralize the business logic for the endpoint.
+- Created a dedicated `workflowRoutes.ts` file to handle workflow-related API endpoints.
+- Added a new `GET /workflow/:id/status` endpoint for retrieving workflow execution status.
+- Introduced a `WorkflowService` layer to separate business logic from route handlers.
+- Implemented `getWorkflowStatus()` in `WorkflowService`.
+- Added workflow lookup by `workflowId`.
+- Included task aggregation logic to calculate `completedTasks`.
+- Included task aggregation logic to calculate `totalTasks`.
+- Returned the current workflow status (`initial`, `in_progress`, `completed`, `failed`).
+- Implemented `404 Not Found` handling when the workflow does not exist.
+- Reused the existing typed error hierarchy (`NotFoundError`, `AppError`) for consistent error handling.
+- Added centralized route error handling to avoid duplicated error response logic.
+- Registered the workflow router in the application entry point (`index.ts`).
+- Added OpenAPI and Swagger documentation for the new status endpoint.
+- Added response examples showing workflow progress information.
+- Added unit tests covering successful status retrieval.
+- Added unit tests covering workflow-not-found scenarios.
+- Verified that workflow progress information is calculated from the underlying task states rather than stored separately.
+- Kept database access inside the service layer, avoiding unnecessary repository abstractions for this challenge.
+- Maintained a clean separation between routing, business logic, and persistence concerns.
+
+## 6. Create an Endpoint for Retrieving Workflow Results
+
+- Added the `GET /workflow/:id/results` endpoint to retrieve the final result of a workflow.
+- Created the `getWorkflowResults()` method in `WorkflowService` to centralize the business logic.
 - Implemented validation that returns `404 Not Found` when the workflow does not exist.
 - Implemented validation that returns `400 Bad Request` when the workflow has not completed yet.
-- Reused the typed error system (`NotFoundError`, `BadRequestError`) to keep API behavior consistent with the rest of the project.
+- Reused the typed error system (`NotFoundError`, `BadRequestError`) to keep the API behavior consistent with the rest of the project.
 - Added centralized route-level error handling through `handleRouteError`.
-- Exposed the `finalResult` property from the `Workflow` entity in the endpoint response.
+- Exposed the `finalResult` property of the `Workflow` entity in the endpoint response.
 - Updated the `workflowRoutes` dependency interface to include `getWorkflowResults`.
 - Registered the new route in the workflow router.
 - Added OpenAPI and Swagger documentation for the results endpoint.
 - Added response examples for completed workflows.
-- Verified compliance with the functional requirements for this exercise: `404` when the workflow does not exist, `400` when it is not finished, and `finalResult` when it is completed.
-- Updated the README with usage guidance and documentation for the new behavior.
+- Verified compliance with the functional requirements for this exercise: `404` when the workflow does not exist, `400` when it has not finished, and `finalResult` when it is completed.
+- Updated the README with usage instructions and documentation for the new functionality.
 - Added and updated tests to cover the new endpoints and workflow execution flows.
