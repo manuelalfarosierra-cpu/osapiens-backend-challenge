@@ -215,5 +215,17 @@ describe("analysis to workflow integration", () => {
       TaskStatus.Completed,
       TaskStatus.Completed,
     ]);
+
+    const resultsResponse = await invokeRoute({
+      method: "GET",
+      url: `/workflow/${workflowId}/results`,
+    });
+
+    expect(resultsResponse.status).toBe(200);
+    expect(resultsResponse.body).toEqual({
+      workflowId,
+      status: "completed",
+      finalResult: workflow?.finalResult,
+    });
   });
 });

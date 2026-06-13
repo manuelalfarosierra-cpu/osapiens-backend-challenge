@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { BadRequestError } from "../../shared/errors/BadRequestError";
 import { NotFoundError } from "../../shared/errors/NotFoundError";
 
 vi.mock("../../workers/taskRunner", () => ({
@@ -61,5 +62,46 @@ describe("WorkflowService", () => {
     expect(error).toBeInstanceOf(NotFoundError);
     expect(error.message).toBe("Workflow missing-workflow not found");
     expect(error.statusCode).toBe(404);
+  });
+
+  it("returns the final workflow result when the workflow is completed", async () => {
+    findOne.mockResolvedValue({
+      workflowId: "workflow-123",
+      status: "completed",
+      finalResult: '{"summary":"done"}',
+    });
+    const workflowService = new WorkflowService({
+      findOne,
+    } as any);
+
+    await expect(
+      workflowService.getWorkflowResults("workflow-123"),
+    ).resolves.toEqual({
+      workflowId: "workflow-123",
+      status: "completed",
+      finalResult: '{"summary":"done"}',
+    });
+    expect(findOne).toHaveBeenCalledWith({
+      where: { workflowId: "workflow-123" },
+    });
+  });
+
+  it("throws BadRequestError when the workflow is not completed yet", async () => {
+    findOne.mockResolvedValue({
+      workflowId: "workflow-123",
+      status: "in_progress",
+      finalResult: null,
+    });
+    const workflowService = new WorkflowService({
+      findOne,
+    } as any);
+
+    const error = await workflowService
+      .getWorkflowResults("workflow-123")
+      .catch((thrownError) => thrownError);
+
+    expect(error).toBeInstanceOf(BadRequestError);
+    expect(error.message).toBe("Workflow workflow-123 is not completed yet");
+    expect(error.statusCode).toBe(400);
   });
 });

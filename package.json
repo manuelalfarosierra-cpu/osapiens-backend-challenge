@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "start": "ts-node src/index.ts",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "docs:build": "node -r ts-node/register scripts/build-openapi-docs.js",
     "test": "vitest run",
     "test:verbose": "npx vitest run --reporter=verbose",
     "test:watch": "vitest",

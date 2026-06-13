@@ -174,6 +174,81 @@ export const openApiSpec = {
         },
       },
     },
+    "/workflow/{id}/results": {
+      get: {
+        tags: ["Workflow"],
+        summary: "Get completed workflow results",
+        description:
+          "Returns the aggregated final result for a workflow that has already completed.",
+        operationId: "getWorkflowResults",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "Workflow identifier.",
+            schema: {
+              type: "string",
+              format: "uuid",
+            },
+            example: "0ab26b35-682c-42ce-a842-d62cea585885",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Workflow results returned",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/WorkflowResultsResponse",
+                },
+              },
+            },
+          },
+          "400": {
+            description: "Workflow has not completed yet",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+                example: {
+                  message:
+                    "Workflow 0ab26b35-682c-42ce-a842-d62cea585885 is not completed yet",
+                },
+              },
+            },
+          },
+          "404": {
+            description: "Workflow not found",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+                example: {
+                  message:
+                    "Workflow 0ab26b35-682c-42ce-a842-d62cea585885 not found",
+                },
+              },
+            },
+          },
+          "500": {
+            description: "Unexpected workflow results error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+                example: {
+                  message: "Internal server error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -239,6 +314,26 @@ export const openApiSpec = {
             type: "integer",
             minimum: 0,
             example: 3,
+          },
+        },
+      },
+      WorkflowResultsResponse: {
+        type: "object",
+        required: ["workflowId", "status", "finalResult"],
+        properties: {
+          workflowId: {
+            type: "string",
+            format: "uuid",
+            example: "0ab26b35-682c-42ce-a842-d62cea585885",
+          },
+          status: {
+            type: "string",
+            enum: ["completed"],
+            example: "completed",
+          },
+          finalResult: {
+            type: "string",
+            example: '{"summary":"Aggregated workflow results go here"}',
           },
         },
       },
